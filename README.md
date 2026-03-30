@@ -3,200 +3,137 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-1.0.0-brightgreen.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-1.0.1-brightgreen.svg" alt="Version">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License"></a>
+  <img src="https://img.shields.io/badge/Claude_Code-Plugin-purple.svg" alt="Claude Code Plugin">
   <img src="https://img.shields.io/badge/Codex_CLI-Skill-blue.svg" alt="Codex CLI Skill">
   <img src="https://img.shields.io/badge/Patterns-6_Architectures-orange.svg" alt="6 Architecture Patterns">
-  <img src="https://img.shields.io/badge/Mode-Subagents-green.svg" alt="Subagents">
 </p>
 
-# Harness for Codex
+# Harness
 
-**Agent Team & Skill Architect** — An OpenAI Codex CLI Skill
+**Agent Team & Skill Architect** — Works with both **Claude Code** and **OpenAI Codex CLI**
 
-**English** | [한국어](README_KO.md)
+**English** | [한국어](README_KO.md) | [日本語](README_JA.md)
 
-> Adapted from [revfactory/harness](https://github.com/revfactory/harness) (Claude Code plugin) for OpenAI Codex CLI.
+> Forked from [revfactory/harness](https://github.com/revfactory/harness). This version supports both Claude Code and Codex CLI from a single repository.
 
 A meta-skill that designs domain-specific agent teams, defines specialized agents, and generates the skills they use.
 
-## Overview
+## Installation
 
-Harness leverages Codex CLI's subagent system to decompose complex tasks into coordinated teams of specialized agents. Say "build a harness for this project" and it automatically generates agent definitions (`.codex/agents/`) and skills (`.agents/skills/`) tailored to your domain.
+### Claude Code
+
+```shell
+# Via marketplace
+/plugin marketplace add sumniy/codex-harness
+/plugin install harness@harness
+
+# Or direct copy
+cp -r skills/claude-code/harness ~/.claude/skills/harness
+```
+
+### OpenAI Codex CLI
+
+```
+# Via $skill-installer
+$skill-installer install https://github.com/sumniy/codex-harness/tree/main/skills/codex/harness
+
+# Or direct copy
+cp -r skills/codex/harness ~/.agents/skills/harness
+```
+
+## Repository Structure
+
+```
+harness/
+├── .claude-plugin/                    # Claude Code plugin manifest
+│   ├── plugin.json
+│   └── marketplace.json
+├── .codex-plugin/                     # Codex CLI plugin manifest
+│   ├── plugin.json
+│   └── marketplace.json
+│
+├── skills/
+│   ├── claude-code/                   # ← Claude Code version (original)
+│   │   └── harness/
+│   │       ├── SKILL.md
+│   │       └── references/
+│   │           ├── agent-design-patterns.md
+│   │           ├── orchestrator-template.md
+│   │           ├── team-examples.md
+│   │           ├── skill-writing-guide.md
+│   │           ├── skill-testing-guide.md
+│   │           └── qa-agent-guide.md
+│   │
+│   └── codex/                         # ← Codex CLI version (adapted)
+│       └── harness/
+│           ├── SKILL.md
+│           ├── agents/openai.yaml
+│           └── references/
+│               ├── agent-design-patterns.md
+│               ├── orchestrator-template.md
+│               ├── team-examples.md
+│               ├── skill-writing-guide.md
+│               ├── skill-testing-guide.md
+│               └── qa-agent-guide.md
+│
+├── README.md
+├── README_KO.md
+└── README_JA.md
+```
+
+## Platform Comparison
+
+| | Claude Code | Codex CLI |
+|---|---|---|
+| **Skill path** | `skills/claude-code/harness/` | `skills/codex/harness/` |
+| **Agent defs** | `.claude/agents/{name}.md` | `.codex/agents/{name}.toml` |
+| **Skill defs** | `.claude/skills/{name}/skill.md` | `.agents/skills/{name}/SKILL.md` |
+| **Execution mode** | Agent Teams (default) + Subagents | Subagents only (parallel via `max_threads`) |
+| **Top model** | `model: "opus"` | `model = "o3"` / `gpt-5.4` |
+| **Install cmd** | `/plugin install` | `$skill-installer install <url>` |
+| **Invoke** | `/harness` or auto-trigger | `$harness` or auto-trigger |
+| **Project docs** | `CLAUDE.md` | `AGENTS.md` |
 
 ## Key Features
 
-- **Agent Team Design** — 6 architectural patterns: Pipeline, Fan-out/Fan-in, Expert Pool, Producer-Reviewer, Supervisor, and Hierarchical Delegation
-- **Skill Generation** — Auto-generates skills with Progressive Disclosure for efficient context management
-- **Orchestration** — File-based inter-agent data passing, error handling, and coordination protocols
-- **Validation** — Trigger verification, dry-run testing, and with-skill vs without-skill comparison tests
+- **6 Architecture Patterns** — Pipeline, Fan-out/Fan-in, Expert Pool, Producer-Reviewer, Supervisor, Hierarchical Delegation
+- **Skill Generation** — Progressive Disclosure for efficient context management
+- **Orchestration** — Inter-agent data passing, error handling, coordination protocols
+- **Validation** — Trigger verification, dry-run testing, with-skill vs without-skill comparison
 
-## Workflow
+## 6-Phase Workflow
 
 ```
 Phase 1: Domain Analysis
-    ↓
-Phase 2: Team Architecture Design (Subagent Parallelization)
-    ↓
-Phase 3: Agent Definition Generation (.codex/agents/)
-    ↓
-Phase 4: Skill Generation (.agents/skills/)
-    ↓
+Phase 2: Team Architecture Design
+Phase 3: Agent Definition Generation
+Phase 4: Skill Generation
 Phase 5: Integration & Orchestration
-    ↓
 Phase 6: Validation & Testing
-```
-
-## Installation
-
-### Via $skill-installer (Recommended)
-
-```
-$skill-installer install https://github.com/sumniy/codex-harness/tree/main/skills/harness
-```
-
-### Direct Installation as Global Skill
-
-```shell
-# Copy the skills directory to ~/.codex/skills/harness/ or ~/.agents/skills/harness/
-cp -r skills/harness ~/.agents/skills/harness
-```
-
-### As a Plugin (via marketplace.json)
-
-Add to your `~/.agents/plugins/marketplace.json`:
-
-```json
-{
-  "name": "codex-harness-marketplace",
-  "interface": { "displayName": "Codex Harness" },
-  "plugins": [
-    {
-      "name": "harness",
-      "source": { "source": "local", "path": "/path/to/codex-harness" },
-      "policy": { "installation": "AVAILABLE" },
-      "category": "Productivity"
-    }
-  ]
-}
-```
-
-Then browse via `/plugins` in Codex CLI.
-
-## Plugin Structure
-
-```
-codex-harness/
-├── .codex-plugin/
-│   ├── plugin.json                    # Plugin manifest
-│   └── marketplace.json               # Marketplace registry
-├── skills/
-│   └── harness/
-│       ├── SKILL.md                   # Main skill definition (6-Phase workflow)
-│       ├── agents/
-│       │   └── openai.yaml            # Skill metadata & policy
-│       └── references/
-│           ├── agent-design-patterns.md   # 6 architectural patterns
-│           ├── orchestrator-template.md   # Subagent orchestrator template
-│           ├── team-examples.md           # 5 real-world team configurations
-│           ├── skill-writing-guide.md     # Skill authoring guide
-│           ├── skill-testing-guide.md     # Testing & evaluation methodology
-│           └── qa-agent-guide.md          # QA agent integration guide
-└── README.md
 ```
 
 ## Usage
 
-Trigger in Codex CLI with prompts like:
-
+**Claude Code:**
 ```
+하네스 구성해줘
 Build a harness for this project
+```
+
+**Codex CLI:**
+```
 $harness
 하네스 구성해줘
+Build a harness for this project
 ```
-
-### Execution Mode
-
-Codex uses **subagent parallelization** as the primary execution mode. Subagents run in parallel (controlled by `max_threads` in `.codex/config.toml`) and exchange data via files in `_workspace/`.
-
-### Architecture Patterns
-
-| Pattern | Description |
-|---------|-------------|
-| Pipeline | Sequential dependent tasks |
-| Fan-out/Fan-in | Parallel independent tasks |
-| Expert Pool | Context-dependent selective invocation |
-| Producer-Reviewer | Generation followed by quality review |
-| Supervisor | Central agent with dynamic task distribution |
-| Hierarchical Delegation | Top-down recursive delegation |
-
-## Output
-
-Files generated by Harness:
-
-```
-your-project/
-├── .codex/
-│   ├── config.toml         # Agent configuration
-│   └── agents/             # Agent definition files (TOML)
-│       ├── analyst.toml
-│       ├── builder.toml
-│       └── qa.toml
-├── .agents/
-│   └── skills/             # Skill files
-│       ├── analyze/
-│       │   └── SKILL.md
-│       └── build/
-│           ├── SKILL.md
-│           └── references/
-└── AGENTS.md               # Project context & agent routing
-```
-
-## Use Cases — Try These Prompts
-
-Copy any prompt below into Codex CLI after installing Harness:
-
-**Deep Research**
-```
-Build a harness for deep research. I need agents that can investigate
-any topic from multiple angles — web search, academic sources, community
-sentiment — then cross-validate findings and produce a comprehensive report.
-```
-
-**Website Development**
-```
-Build a harness for full-stack website development. The team should handle
-design, frontend (React/Next.js), backend (API), and QA testing in a
-coordinated pipeline from wireframe to deployment.
-```
-
-**Code Review & Refactoring**
-```
-Build a harness for comprehensive code review. I want parallel agents
-checking architecture, security vulnerabilities, performance bottlenecks,
-and code style — then merging all findings into a single report.
-```
-
-## Claude Code ↔ Codex Mapping
-
-| Claude Code | Codex CLI |
-|-------------|-----------|
-| `CLAUDE.md` | `AGENTS.md` |
-| `.claude/agents/{name}.md` | `.codex/agents/{name}.toml` |
-| `.claude/skills/{name}/skill.md` | `.agents/skills/{name}/SKILL.md` |
-| `/plugin marketplace add` | `$skill-installer install <url>` |
-| `/plugin install` | `/plugins` or direct copy |
-| Agent Teams (TeamCreate) | Subagent parallelization |
-| `model: "opus"` | Top model (o3, gpt-5.4, etc.) |
 
 ## Credits
 
 - Original: [revfactory/harness](https://github.com/revfactory/harness) by [@revfactory](https://github.com/revfactory)
-- Research: [revfactory/claude-code-harness](https://github.com/revfactory/claude-code-harness) — +60% quality improvement with harness
-
-## Requirements
-
-- [Codex CLI](https://github.com/openai/codex) installed (`npm i -g @openai/codex`)
+- Research: [revfactory/claude-code-harness](https://github.com/revfactory/claude-code-harness) — +60% quality improvement
+- Harness 100: [revfactory/harness-100](https://github.com/revfactory/harness-100) — 100 pre-built harnesses across 10 domains
 
 ## License
 
