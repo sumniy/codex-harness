@@ -1,0 +1,31 @@
+{
+  "name": "harness",
+  "description": "Agent Team & Skill Architect — Meta-skill that designs agent teams, defines specialized agents, and generates skills for your domain/project. 도메인/프로젝트에 맞는 하네스를 구성하고, 전문 에이전트를 정의하며, 에이전트가 사용할 스킬을 생성하는 메타 스킬.",
+  "version": "1.0.0",
+  "skills": "./skills/",
+  "author": {
+    "name": "sumniy (adapted from revfactory/harness)",
+    "url": "https://github.com/sumniy/codex-harness"
+  },
+  "homepage": "https://github.com/sumniy/codex-harness",
+  "repository": "https://github.com/sumniy/codex-harness",
+  "license": "Apache-2.0",
+  "keywords": [
+    "harness",
+    "agent-team",
+    "skill-architect",
+    "meta-skill",
+    "orchestration",
+    "codex"
+  ],
+  "interface": {
+    "displayName": "Harness for Codex",
+    "shortDescription": "Meta-skill that designs agent teams and generates skills for Codex CLI",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "하네스 구성해줘",
+      "Build a harness for this project"
+    ]
+  }
+}
